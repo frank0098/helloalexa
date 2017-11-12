@@ -560,7 +560,7 @@ app.post('/query', function(request, resp){
   console.log(request.query);
   var soldict = {};
   var allPaths = [];
-  if(request.query.locations.length === 3){
+  if(request.query.locations.length >= 3){
 
     var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1], 'dst3' : request.query.locations[2]};
     var level = Object.keys(request_).length;
@@ -809,7 +809,7 @@ app.post('/query', function(request, resp){
             'dest' : "none",
             'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
           };
-          //console.log("inside loop2");
+          console.log("inside loop2");
           var restaurantCandidate1 = response.query.destination;
           //rescur.send("world");
           var possibleSolution = pos0 + '#'+pos1;
@@ -817,7 +817,7 @@ app.post('/query', function(request, resp){
           //console.log(possibleSolution);
           console.log(Object.keys(soldict).length);
           if(Object.keys(soldict).length === allPaths.length){
-            //console.log(soldict);
+            console.log("soldict");
             console.log("BINGO");
             var maxcandidate;
             var duration = 20000000;
