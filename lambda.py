@@ -1,18 +1,9 @@
-"""
-This sample demonstrates a simple skill built with the Amazon Alexa Skills Kit.
-The Intent Schema, Custom Slots, and Sample Utterances for this skill, as well
-as testing instructions are located at http://amzn.to/1LzFrj6
 
-For additional samples, visit the Alexa Skills Kit Getting Started guide at
-http://amzn.to/1LGWsLG
-"""
 
 from __future__ import print_function
 
 
 # --------------- Helpers that build all of the responses ----------------------
-
-
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
@@ -52,7 +43,7 @@ def get_welcome_response():
 
     session_attributes = {}
     card_title = "Welcome"
-    speech_output = "Welcome to the Hahaha. " \
+    speech_output = "Welcome to the Weekend killer. " \
                     "Please tell me your destination, "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
@@ -74,42 +65,57 @@ def handle_session_end_request():
         card_title, speech_output, None, should_end_session))
 
 
+
 def set_destination(intent,session):
     card_title = intent['name']
     session_attributes={}
     should_end_session=False
-    arr=[]
-    if 'Location' in intent['slots']:
-        destination=intent['slot']['Location']['value']
-        if destination == "done":
-            if not session.get('attributes', {}) or not "Destinations" in session.get('attributes', {}):
+    destination_count=0
+    if 'Destination' in intent['slots']:
+        print (intent['slots']['Destination'])
+        if not 'value' in intent['slots']['Destination']:
+            speech_output="I'm not sure what your destination is. Please try again."
+            reprompt_text="I'm not sure what your destination is. Please try again."
+            return build_response(session_attributes, build_speechlet_response(
+                intent['name'], speech_output, reprompt_text, should_end_session))
+
+        destination=intent['slots']['Destination']['value']
+        print ("destination is "+destination)
+        if destination == "done" or destination == "finished" or destination == "no" or destination == "stop":
+            print ("branch done")
+            if not session.get('attributes', {}) or not "Destination_count" in session.get('attributes', {}):
                 speech_output="Oops You are not going anywhere. Please try."
                 reprompt_text="Oops You are not going anywhere. Please try."
             else:
                 should_end_session=True
-                arr=session['attributes']['Destinations']
+                destination_count=session['attributes']['Destination_count']
                 reprompt_text=None
                 speech_output="You are going to these places: "
-                for x in arr:
-                    tmp=x+", "
+                for x in range(1,destination_count+1):
+                    key="Destination"+str(x)
+                    tmp=session['attributes'][key]+", "
                     speech_output+=tmp
 
         else:
-            if not session.get('attributes', {}) or not "Destinations" in session.get('attributes', {}):
-                session_attributes={"Destinations":[]}
-            arr=session['attributes']['Destinations']
-            arr.append(destination)
-            session_attributes={"Destinations":arr}
+            print ("branch2")
+            if session.get('attributes', {}) and "Destination_count" in session.get('attributes', {}):
+                destination_count=session['attributes']['Destination_count']
+                session_attributes=session['attributes']
+
+            key="Destination"+str(destination_count+1)
+            session_attributes["Destination_count"]=destination_count+1
+            session_attributes[key]=destination
             speech_output="Your next destination is "+ destination+\
-                            ".Do you plan to do anything else?"
-            reprompt_text=None
-            should_end_session = True
+                            ",do you plan to do anything else?"
+            reprompt_text="Your next destination is "+ destination+\
+                            ",do you plan to do anything else?"
+
     else:
         speech_output="I'm not sure what your destination is. Please try again."
         reprompt_text="I'm not sure what your destination is. Please try again."
-        return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
+    print (session_attributes)
+    return build_response(session_attributes, build_speechlet_response(
+        intent['name'], speech_output, reprompt_text, should_end_session))
 
 
 # --------------- Events ------------------
@@ -141,6 +147,7 @@ def on_intent(intent_request, session):
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
 
+    # Dispatch to your skill's intent handlers
     if intent_name=="SetDestinationIntent":
         return set_destination(intent,session)
     elif intent_name == "AMAZON.HelpIntent":
@@ -189,6 +196,3 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
-
-
-
