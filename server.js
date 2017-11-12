@@ -576,6 +576,7 @@ app.post('/update_usage',function(request,response){
 
      }
    }
+ })
 
 
 wss.on('connection', function connection(ws, req) {
