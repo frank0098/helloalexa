@@ -557,134 +557,125 @@ app.get('/find', function (req, resp) {
 // })
 
 app.post('/query', function(request, resp){
-  var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1], 'dst3' : request.locations[2]};
-  var level = Object.keys(request_).length;
-  var candidates = [];
-  for(key in request_){
-    candidates.push(identify(request_[key]));
-  }
-  console.log(candidates);
-  var biglist = [];
-  biglist.push(home);
-  for(var i = 0 ; i < level ; i++){
-    for(var j = 0;j < candidates[i].length ; j++){
-      biglist.push(candidates[i][j]);
-    }
-  }
-  for(var i = 0 ; i < biglist.length ; i++){
-    for(var j = 0 ; j < biglist.length; j++){
-      if(i != j && [biglist[i],biglist[j]] in query){
+  if(request.locations.length === 3){
 
-      }
+    var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1], 'dst3' : request.locations[2]};
+    var level = Object.keys(request_).length;
+    var candidates = [];
+    for(key in request_){
+      candidates.push(identify(request_[key]));
     }
-  }
-
-  var allPaths = [];
-  var visited = [];
-  for (var i = 0; i < level; i++) {
-    visited.push(false);
-  }
-  for(var i = 0 ; i < level; i++){
-    var arr1 = candidates[i];
-    console.log(arr1);
-    for(var j = 0 ; j < arr1.length ; j++){
-      for(var i1 = 0 ; i1 < level ; i1++){
-        if(i1 !== i){
-          var arr2 = candidates[i1];
-          for(var k = 0 ; k < arr2.length ; k++){
-            for(var i2 = 0 ; i2 < level; i2++){
-              if(i !== i2 && i1 !== i2){
-                var arr3 = candidates[i2];
-                for(var m = 0 ; m < arr3.length ; m++){
-                  var solution = [home, arr1[j], arr2[k],arr3[m]];
-                  allPaths.push(solution)
+    var allPaths = [];
+    var visited = [];
+    for (var i = 0; i < level; i++) {
+      visited.push(false);
+    }
+    for(var i = 0 ; i < level; i++){
+      var arr1 = candidates[i];
+      console.log(arr1);
+      for(var j = 0 ; j < arr1.length ; j++){
+        for(var i1 = 0 ; i1 < level ; i1++){
+          if(i1 !== i){
+            var arr2 = candidates[i1];
+            for(var k = 0 ; k < arr2.length ; k++){
+              for(var i2 = 0 ; i2 < level; i2++){
+                if(i !== i2 && i1 !== i2){
+                  var arr3 = candidates[i2];
+                  for(var m = 0 ; m < arr3.length ; m++){
+                    var solution = [home, arr1[j], arr2[k],arr3[m]];
+                    allPaths.push(solution)
+                  }
                 }
               }
-            }
 
+            }
           }
         }
       }
     }
-  }
-  console.log("ALL PATHS");
-  console.log(allPaths.length);
-  //console.log(allPaths);
-  soldict = {};
-  allPaths.forEach(function(path){
-    //var candidate = allPaths[k];
-    var pos0 = path[0];
-    var pos1 = path[1];
-    var pos2 = path[2];
-    var pos3 = path[3];
-    //console.log("inside loop1");
-    //console.log(pos0);
-    ///console.log(pos1);
-    var result = googleMapsClient.directions({
-        origin: pos0,
-        destination: pos1,
-      }, function(err, response){
-        var rank = k;
-        var temp = {
-          'dest' : pos2,
-          'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
-        };
-        //console.log("inside loop2");
-        var restaurantCandidate1 = response.query.destination;
-        //rescur.send("world");
-        googleMapsClient.directions({
-            origin: pos1,
-            destination: pos2,
-          }, function(err, response1){
-            var temp1 = {
-              'dest' : pos2,
-              'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
-            };
-            //console.log("inside loop3");
-            googleMapsClient.directions({
-                origin: pos1,
-                destination: pos2,
-              }, function(err, response1){
-                var temp2 = {
-                  'dest' : pos2,
-                  'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
-                };
-                console.log("inside loop4");
-                var possibleSolution = pos0 + '#'+pos1+ '#'+pos2+ '#'+pos3;
-                soldict[possibleSolution] = temp.duration + temp1.duration + temp2.duration;
-                //console.log(possibleSolution);
-                console.log(Object.keys(soldict).length);
-                if(Object.keys(soldict).length === allPaths.length){
-                  //console.log(soldict);
-                  console.log("BINGO");
-                  var maxcandidate;
-                  var duration = 20000000;
-                  for(key in soldict){
-                    var value = soldict[key];
-                    if(value < duration){
-                      maxcandidate = key;
-                      console.log(maxcandidate.split("#"));
-                      duration = value;
+    console.log("ALL PATHS");
+    console.log(allPaths.length);
+    //console.log(allPaths);
+    soldict = {};
+    allPaths.forEach(function(path){
+      //var candidate = allPaths[k];
+      var pos0 = path[0];
+      var pos1 = path[1];
+      var pos2 = path[2];
+      var pos3 = path[3];
+      //console.log("inside loop1");
+      //console.log(pos0);
+      ///console.log(pos1);
+      var result = googleMapsClient.directions({
+          origin: pos0,
+          destination: pos1,
+        }, function(err, response){
+          var rank = k;
+          var temp = {
+            'dest' : pos2,
+            'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+          };
+          //console.log("inside loop2");
+          var restaurantCandidate1 = response.query.destination;
+          //rescur.send("world");
+          googleMapsClient.directions({
+              origin: pos1,
+              destination: pos2,
+            }, function(err, response1){
+              var temp1 = {
+                'dest' : pos2,
+                'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
+              };
+              //console.log("inside loop3");
+              googleMapsClient.directions({
+                  origin: pos1,
+                  destination: pos2,
+                }, function(err, response1){
+                  var temp2 = {
+                    'dest' : pos2,
+                    'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
+                  };
+                  console.log("inside loop4");
+                  var possibleSolution = pos0 + '#'+pos1+ '#'+pos2+ '#'+pos3;
+                  soldict[possibleSolution] = temp.duration + temp1.duration + temp2.duration;
+                  //console.log(possibleSolution);
+                  console.log(Object.keys(soldict).length);
+                  if(Object.keys(soldict).length === allPaths.length){
+                    //console.log(soldict);
+                    console.log("BINGO");
+                    var maxcandidate;
+                    var duration = 20000000;
+                    for(key in soldict){
+                      var value = soldict[key];
+                      if(value < duration){
+                        maxcandidate = key;
+                        console.log(maxcandidate.split("#"));
+                        duration = value;
+                      }
                     }
-                  }
-                  //var sliceresult = (maxcandidate.split("#")).slice(0,1);
-                  var locationsarray = maxcandidate.split("#");
-                  locationsarray.splice(0,1);
-                  //console.log(sliceresult);
-                  console.log(locationsarray);
-                  var result = {
-                    "success":true,
-                    "type":"locations",
-                    "home":"4115 Postgate Terrace, Aspen Hill, MD 20906",
-                    "locations": locationsarray
+                    //var sliceresult = (maxcandidate.split("#")).slice(0,1);
+                    var locationsarray = maxcandidate.split("#");
+                    locationsarray.splice(0,1);
+                    //console.log(sliceresult);
+                    console.log(locationsarray);
+                    var result = {
+                      "success":true,
+                      "type":"locations",
+                      "home":"4115 Postgate Terrace, Aspen Hill, MD 20906",
+                      "locations": locationsarray,
+                      "duration": value
 
+                    }
+                    resp.send(result);
                   }
-                  resp.send(result);
-                }
-              });
-          });
-      });
-  })
+                });
+            });
+        });
+    })
+  }else if(request.locations.length === 3){
+
+  }else if(request.locations.length === 1)
+
 });
 
 app.post('/update_usage',function(request,response){
