@@ -559,9 +559,7 @@ var soldict = {};
 var allPaths = [];
 app.post('/query', function(request, resp){
   //console.log(request);
-  if(allPaths.length !== 0 && allPaths.length === Object.keys(soldict).length){
 
-  }
   if(request.query.locations.length === 3){
 
     var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1], 'dst3' : request.query.locations[2]};
