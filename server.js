@@ -30,6 +30,11 @@ var solution = {};
 //   // Nothing went wrong, so callback with a null error.
 //   return doneCallback(null);
 // };
+app.get('/test',function(request,response){
+  var ret={"success":true,"message":"I am a real hacker"}
+  response.send(ret)
+})
+
 
 function balabala(rescan, callback){
   //var deferred = Q.defer();
@@ -61,6 +66,13 @@ function balabala(rescan, callback){
      console.log("before resutrn");
      //return deferred.promise;
 }
+
+app.get('/test',function(request,response){
+  var ret={"success":true,"message":"I am a real hacker"}
+  response.send(ret)
+})
+
+
 app.get('/', function (req, res) {
   //console.log(req);
 
