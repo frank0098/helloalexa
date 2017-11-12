@@ -1,7 +1,8 @@
 
 
 from __future__ import print_function
-
+import requests
+server_api="""http://35.202.31.234:7000/test"""
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -90,11 +91,16 @@ def set_destination(intent,session):
                 should_end_session=True
                 destination_count=session['attributes']['Destination_count']
                 reprompt_text=None
+                r = requests.get(server_api)
+                result = str(r.json()["message"])
                 speech_output="You are going to these places: "
+                speech_output+=result+" "
                 for x in range(1,destination_count+1):
                     key="Destination"+str(x)
                     tmp=session['attributes'][key]+", "
                     speech_output+=tmp
+                r = requests.get(server_api+"/test")
+
 
         else:
             print ("branch2")
