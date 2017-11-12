@@ -557,6 +557,7 @@ app.get('/find', function (req, resp) {
 // })
 
 app.post('/query', function(request, resp){
+  console.log(request);
   if(request.locations.length === 3){
 
     var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1], 'dst3' : request.locations[2]};
