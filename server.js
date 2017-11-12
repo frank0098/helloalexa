@@ -558,7 +558,7 @@ app.get('/find', function (req, resp) {
 var soldict = {};
 var allPaths = [];
 app.post('/query', function(request, resp){
-  //console.log(request);
+  console.log(request.query);
 
   if(request.query.locations.length === 3){
 
