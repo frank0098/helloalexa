@@ -776,11 +776,22 @@ app.post('/query', function(request, resp){
         });
       });
   }else if(request.query.locations.length === 1){
+
     var request_ = {'dst1': request.query.locations[0]};
+    // var result = {
+    //   "success":true,
+    //   "type":"locations",
+    //   "home": home,
+    //   "locations": ,
+    //   "duration": value
+    //
+    // }
+    // resq.send();
     var level = Object.keys(request_).length;
     var candidates = [];
     for(key in request_){
       candidates.push(identify(request_[key]));
+      console.log(identify(request_[key]));
     }
     var allPaths = [];
     for(var i = 0 ; i < level; i++){
