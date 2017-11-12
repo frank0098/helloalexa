@@ -11,6 +11,8 @@ const googlemap = require('@google/maps');
 var restaurant = ["Hot N Juicy Crawfish, Connecticut Avenue Northwest, Washington, DC", "9th Street Northwest, Washington, DC", "Pearl Dive Oyster Palace, 14th Street Northwest, Washington, DC"];
 var supermarket = ["Whole Foods Market, P Street Northwest, Washington, DC", "FRESHFARM Dupont Circle Market, 20th Street Northwest, Washington, DC"];
 var home = "4115 Postgate Terrace, Aspen Hill, MD 20906";
+var movie = ["AMC Loews Georgetown 14, K Street Northwest, Washington, DC","Landmark Theaters West End Cinema, M Street Northwest, Washington, DC"];
+var hackathon = ""
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -73,7 +75,7 @@ app.get('/test',function(request,response){
 })
 
 
-app.get('/', function (req, resp) {
+app.get('/find', function (req, resp) {
   //console.log(req);
 
   //var dst1 = ""
