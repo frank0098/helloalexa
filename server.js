@@ -16,7 +16,7 @@ const wss = new WebSocket.Server({ server });
 
 var restaurant = ["Hot N Juicy Crawfish, Connecticut Avenue Northwest, Washington, DC", "9th Street Northwest, Washington, DC", "Pearl Dive Oyster Palace, 14th Street Northwest, Washington, DC"];
 var supermarket = ["Whole Foods Market, P Street Northwest, Washington, DC", "FRESHFARM Dupont Circle Market, 20th Street Northwest, Washington, DC"];
-var home = "4115 Postgate Terrace, Aspen Hill, MD 20906";
+var home = "The White House, Pennsylvania Avenue Northwest, Washington, DC";
 var movie = ["AMC Loews Georgetown 14, K Street Northwest, Washington, DC","Landmark Theaters West End Cinema, M Street Northwest, Washington, DC"];
 var hackathon = ""
 
@@ -254,7 +254,7 @@ app.get('/find', function (req, resp) {
                   var result = {
                     "success":true,
                     "type":"locations",
-                    "home":"4115 Postgate Terrace, Aspen Hill, MD 20906",
+                    "home":home,
                     "locations": locationsarray,
                     "duration": value
 
@@ -643,7 +643,7 @@ app.post('/query', function(request, resp){
                   soldict[possibleSolution] = temp.duration + temp1.duration + temp2.duration;
                   //console.log(possibleSolution);
                   console.log(Object.keys(soldict).length);
-                  if(Object.keys(soldict).length === allPaths.length){
+                  if(Object.keys(soldict).length === allPaths.length/3){
                     //console.log(soldict);
                     console.log("BINGO");
                     var maxcandidate;
@@ -664,7 +664,7 @@ app.post('/query', function(request, resp){
                     var result = {
                       "success":true,
                       "type":"locations",
-                      "home":"4115 Postgate Terrace, Aspen Hill, MD 20906",
+                      "home":home,
                       "locations": locationsarray,
                       "duration": value
 
@@ -676,35 +676,23 @@ app.post('/query', function(request, resp){
         });
     })
   }else if(request.query.locations.length === 2){
-    var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1]};
+    var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1]};
     var level = Object.keys(request_).length;
     var candidates = [];
     for(key in request_){
       candidates.push(identify(request_[key]));
     }
     var allPaths = [];
-    var visited = [];
-    for (var i = 0; i < level; i++) {
-      visited.push(false);
-    }
     for(var i = 0 ; i < level; i++){
       var arr1 = candidates[i];
-      console.log(arr1);
+      //console.log(arr1);
       for(var j = 0 ; j < arr1.length ; j++){
         for(var i1 = 0 ; i1 < level ; i1++){
           if(i1 !== i){
             var arr2 = candidates[i1];
             for(var k = 0 ; k < arr2.length ; k++){
-              for(var i2 = 0 ; i2 < level; i2++){
-                if(i !== i2 && i1 !== i2){
-                  var arr3 = candidates[i2];
-                  for(var m = 0 ; m < arr3.length ; m++){
-                    var solution = [home, arr1[j], arr2[k],arr3[m]];
-                    allPaths.push(solution)
-                  }
-                }
-              }
-
+              var solution = [home, arr1[j], arr2[k]];
+              allPaths.push(solution);
             }
           }
         }
@@ -719,7 +707,6 @@ app.post('/query', function(request, resp){
       var pos0 = path[0];
       var pos1 = path[1];
       var pos2 = path[2];
-      var pos3 = path[3];
       //console.log("inside loop1");
       //console.log(pos0);
       ///console.log(pos1);
@@ -744,51 +731,41 @@ app.post('/query', function(request, resp){
                 'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
               };
               //console.log("inside loop3");
-              googleMapsClient.directions({
-                  origin: pos1,
-                  destination: pos2,
-                }, function(err, response1){
-                  var temp2 = {
-                    'dest' : pos2,
-                    'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
-                  };
-                  console.log("inside loop4");
-                  var possibleSolution = pos0 + '#'+pos1+ '#'+pos2+ '#'+pos3;
-                  soldict[possibleSolution] = temp.duration + temp1.duration + temp2.duration;
-                  //console.log(possibleSolution);
-                  console.log(Object.keys(soldict).length);
-                  if(Object.keys(soldict).length === allPaths.length){
-                    //console.log(soldict);
-                    console.log("BINGO");
-                    var maxcandidate;
-                    var duration = 20000000;
-                    for(key in soldict){
-                      var value = soldict[key];
-                      if(value < duration){
-                        maxcandidate = key;
-                        console.log(maxcandidate.split("#"));
-                        duration = value;
-                      }
-                    }
-                    //var sliceresult = (maxcandidate.split("#")).slice(0,1);
-                    var locationsarray = maxcandidate.split("#");
-                    locationsarray.splice(0,1);
-                    //console.log(sliceresult);
-                    console.log(locationsarray);
-                    var result = {
-                      "success":true,
-                      "type":"locations",
-                      "home":"4115 Postgate Terrace, Aspen Hill, MD 20906",
-                      "locations": locationsarray,
-                      "duration": value
-
-                    }
-                    resp.send(result);
+              var possibleSolution = pos0 + '#'+pos1+ '#'+pos2;
+              soldict[possibleSolution] = temp.duration + temp1.duration;
+              //console.log(possibleSolution);
+              console.log(Object.keys(soldict).length);
+              if(Object.keys(soldict).length === allPaths.length){
+                //console.log(soldict);
+                console.log("BINGO");
+                var maxcandidate;
+                var duration = 20000000;
+                for(key in soldict){
+                  var value = soldict[key];
+                  if(value < duration){
+                    maxcandidate = key;
+                    console.log(maxcandidate.split("#"));
+                    duration = value;
                   }
-                });
+                }
+                //var sliceresult = (maxcandidate.split("#")).slice(0,1);
+                var locationsarray = maxcandidate.split("#");
+                locationsarray.splice(0,1);
+                //console.log(sliceresult);
+                console.log(locationsarray);
+                var result = {
+                  "success":true,
+                  "type":"locations",
+                  "home": home,
+                  "locations": locationsarray,
+                  "duration": value
+
+                }
+                resp.send(result);
+              }
             });
         });
-    })
+      });
   }else if(request.query.locations.length === 1){
 
   }
