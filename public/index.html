@@ -95,8 +95,8 @@
         directionsService = new google.maps.DirectionsService;
         directionsDisplay = new google.maps.DirectionsRenderer;
         var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 6,
-          center: {lat: 41.85, lng: -87.65}
+          zoom: 10,
+          center: {lat: 38.89, lng: -77.04}
         });
         directionsDisplay.setMap(map);
 
@@ -148,7 +148,7 @@
     <script>
     var ws;
     window.onload=function(){
-      ws=new WebSocket("ws://localhost:7000/");
+      ws=new WebSocket("ws://35.202.31.234:7000/");
       ws.onmessage=function(evt){
         var data=JSON.parse(evt.data)
         console.log(data)
