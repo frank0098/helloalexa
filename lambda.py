@@ -2,7 +2,8 @@
 
 from __future__ import print_function
 import requests
-server_api="""http://35.202.31.234:7000/test"""
+server_api="""http://35.202.31.234:7000/query"""
+# server_api="""http://127.0.0.1:7000/test"""
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -91,18 +92,36 @@ def set_destination(intent,session):
                 should_end_session=True
                 destination_count=session['attributes']['Destination_count']
                 reprompt_text=None
-                r = requests.get(server_api)
-                result = str(r.json()["message"])
-                speech_output="You are going to these places: "
-                speech_output+=result+" "
+                request_place=[]
                 for x in range(1,destination_count+1):
                     key="Destination"+str(x)
-                    tmp=session['attributes'][key]+", "
+                    request_place.append(session['attributes'][key])
+                print (request_place)
+                post_request={"locations":request_place}
+                headers = {'content-type' : 'application/json'}
+                r=requests.post(server_api,params=post_request,headers=headers)
+
+                # r = requests.get(server_api)
+                locations = r.json()["locations"]
+                total_time=r.json()["duration"]
+                speech_output="This is the path I suggest: First go to "
+                for x in locations:
+                    key="Destination"+str(x)
+                    tmp= x+", then go to "
                     speech_output+=tmp
-                r = requests.get(server_api+"/test")
+                speech_output+=", then go home"
+                
+                speech_output+=", the total drive time is" +str(total_time)+"minutes. Have a good day"
+
 
 
         else:
+            if not destination=="supermarket" and not destination=="restaurant" and not destination=="movie":
+                speech_output="Please say supermarket or restaurant or movie."
+                reprompt_text="Please say supermarket or restaurant or movie."
+                return build_response(session_attributes, build_speechlet_response(
+                    intent['name'], speech_output, reprompt_text, should_end_session))
+
             print ("branch2")
             if session.get('attributes', {}) and "Destination_count" in session.get('attributes', {}):
                 destination_count=session['attributes']['Destination_count']
@@ -112,9 +131,9 @@ def set_destination(intent,session):
             session_attributes["Destination_count"]=destination_count+1
             session_attributes[key]=destination
             speech_output="Your next destination is "+ destination+\
-                            ",do you plan to do anything else?"
+                            ",do you plan to go somewhere else?"
             reprompt_text="Your next destination is "+ destination+\
-                            ",do you plan to do anything else?"
+                            ",do you plan to go somewhere else?"
 
     else:
         speech_output="I'm not sure what your destination is. Please try again."
@@ -202,3 +221,5 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
+
+
