@@ -776,7 +776,7 @@ app.post('/query', function(request, resp){
         });
       });
   }else if(request.query.locations.length === 1){
-    var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1]};
+    var request_ = {'dst1': request.query.locations[0]};
     var level = Object.keys(request_).length;
     var candidates = [];
     for(key in request_){
