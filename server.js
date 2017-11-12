@@ -806,7 +806,7 @@ app.post('/query', function(request, resp){
         }, function(err, response){
           var rank = k;
           var temp = {
-            'dest' : pos2,
+            'dest' : "none",
             'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
           };
           //console.log("inside loop2");
