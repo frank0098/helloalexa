@@ -776,7 +776,80 @@ app.post('/query', function(request, resp){
         });
       });
   }else if(request.query.locations.length === 1){
+    var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1]};
+    var level = Object.keys(request_).length;
+    var candidates = [];
+    for(key in request_){
+      candidates.push(identify(request_[key]));
+    }
+    var allPaths = [];
+    for(var i = 0 ; i < level; i++){
+      var arr1 = candidates[i];
+      //console.log(arr1);
+      for(var j = 0 ; j < arr1.length ; j++){
+        var solution = [home, arr1[j]];
+        allPaths.push(solution);
+      }
+    }
 
+    soldict = {};
+    allPaths.forEach(function(path){
+      //var candidate = allPaths[k];
+      var pos0 = path[0];
+      var pos1 = path[1];
+      //console.log("inside loop1");
+      //console.log(pos0);
+      ///console.log(pos1);
+      var result = googleMapsClient.directions({
+          origin: pos0,
+          destination: pos1,
+        }, function(err, response){
+          var rank = k;
+          var temp = {
+            'dest' : pos2,
+            'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+          };
+          //console.log("inside loop2");
+          var restaurantCandidate1 = response.query.destination;
+          //rescur.send("world");
+          var possibleSolution = pos0 + '#'+pos1;
+          soldict[possibleSolution] = temp.duration;
+          //console.log(possibleSolution);
+          console.log(Object.keys(soldict).length);
+          if(Object.keys(soldict).length === allPaths.length){
+            //console.log(soldict);
+            console.log("BINGO");
+            var maxcandidate;
+            var duration = 20000000;
+            for(key in soldict){
+              var value = soldict[key];
+              if(value < duration){
+                maxcandidate = key;
+                console.log(maxcandidate.split("#"));
+                duration = value;
+              }
+            }
+            //var sliceresult = (maxcandidate.split("#")).slice(0,1);
+            var locationsarray = maxcandidate.split("#");
+            locationsarray.splice(0,1);
+            //console.log(sliceresult);
+            console.log(locationsarray);
+            var result = {
+              "success":true,
+              "type":"locations",
+              "home": home,
+              "locations": locationsarray,
+              "duration": value
+
+            }
+            console.log("before wss2");
+            wss.clients.forEach(function each(client) {
+                client.send(JSON.stringify(result));
+            });
+            resp.send(result);
+          }
+        });
+      });
   }
 
 });
