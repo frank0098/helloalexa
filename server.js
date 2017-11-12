@@ -36,10 +36,10 @@ app.get('/test',function(request,response){
 })
 
 
-function balabala(rescan, callback){
+function balabala(rescan,rescur, callback){
   //var deferred = Q.defer();
   var restaurantCandidate = rescan.dest;
-
+  //rescur.send("world");
    for(var j = 0 ; j < supermarket.length; j++){
      var supermarketCandidate = supermarket[j];
      console.log("supermarket");
@@ -55,7 +55,7 @@ function balabala(rescan, callback){
            console.log(possibleSolution);
            solution[possibleSolution] = rescan.duration + parseInt(res.json.routes[0].legs[0].duration.text);
            if(Object.keys(solution).length == supermarket.length * restaurant.length){
-             callback();
+             callback(rescur);
            }else{
              console.log("finish one");
              console.log(Object.keys(solution).length);
@@ -73,7 +73,7 @@ app.get('/test',function(request,response){
 })
 
 
-app.get('/', function (req, res) {
+app.get('/', function (req, resp) {
   //console.log(req);
 
   //var dst1 = ""
@@ -98,47 +98,107 @@ app.get('/', function (req, res) {
   //   console.log("something");
   //   console.log(solution);
   // })
-
-
-
+//function(err, response);
+  //res.send("hellow");
   for(var i = 0 ; i < restaurant.length ; i++){
     var restaurantCandidate = restaurant[i];
     var homeToResDuration;
     var result = googleMapsClient.directions({
         origin: home,
         destination: restaurantCandidate,
-      }).asPromise()
-    .then((response) => {
-      var temp = {
-        'dest' : response.query.destination,
-        'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
-      };
-      balabala(temp, function(){
-        console.log("something");
-        console.log(solution);
-        var max = 200000;
-        var candidate;
-        for(key in solution){
-          //console.log("=============================")
-          var value = solution[key];
-        /* use key/value for intended purpose */
-          if(max > value){
-            max = value;
-            candidate = key;
-          }
-        }
-        res.send(candidate);
+      }, function(err, response){
+        var temp = {
+          'dest' : response.query.destination,
+          'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+        };
+        var restaurantCandidate1 = response.query.destination;
+        //rescur.send("world");
+         for(var j = 0 ; j < supermarket.length; j++){
+           var supermarketCandidate = supermarket[j];
+           console.log("supermarket");
+           console.log(supermarketCandidate);
+           googleMapsClient.directions({
+               origin: restaurantCandidate1,
+               destination: supermarketCandidate,
+             }, function(err, response1){
+
+                   var possibleSolution = [home, response1.query.origin, response1.query.destination];
+                   console.log("solution update");
+                   //console.log(totalTime);
+                   console.log(possibleSolution);
+                   solution[possibleSolution] = temp.duration + parseInt(response1.json.routes[0].legs[0].duration.text);
+                   if(Object.keys(solution).length == supermarket.length * restaurant.length){
+                     console.log("something");
+                     console.log(solution);
+                     var max = 200000;
+                     var candidate;
+                     for(key in solution){
+                       //console.log("=============================")
+                       var value = solution[key];
+                     /* use key/value for intended purpose */
+                       if(max > value){
+                         max = value;
+                         candidate = key;
+                       }
+                     }
+                     console.log(candidate);
+                     console.log("finish");
+                     console.log(solution);
+                     var answer = {'answer':candidate};
+                     resp.send(answer);
+                     console.log(answer)
+                   }else{
+                     console.log("finish one");
+                     console.log(Object.keys(solution).length);
+                     console.log(solution)
+                   }
+             });
+           }
       });
-    })}
-
-
-
-
-
-
-
-
+    }
   // for(var i = 0 ; i < restaurant.length ; i++){
+  //   var restaurantCandidate = restaurant[i];
+  //   var homeToResDuration;
+  //   var result = googleMapsClient.directions({
+  //       origin: home,
+  //       destination: restaurantCandidate,
+  //     }).asPromise()
+  //   .then((response) => {
+  //     var temp = {
+  //       'dest' : response.query.destination,
+  //       'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+  //     };
+  //     balabala(temp, res, function(rescur){
+  //       console.log("something");
+  //       console.log(solution);
+  //       var max = 200000;
+  //       var candidate;
+  //       for(key in solution){
+  //         //console.log("=============================")
+  //         var value = solution[key];
+  //       /* use key/value for intended purpose */
+  //         if(max > value){
+  //           max = value;
+  //           candidate = key;
+  //         }
+  //       }
+  //       console.log(candidate);
+  //       console.log("finish");
+  //       var answer = {'answer':candidate}
+  //       res.send("answer");
+  //       console.log(answer)
+  //     });
+  //   })}
+  //
+  //
+  //   res.send("done");
+  //
+  //
+  //
+  //
+  //
+  //
+  // // for(var i = 0 ; i < restaurant.length ; i++){
   //   var restaurantCandidate = restaurant[i];
   //   var homeToResDuration;
   //   var result = googleMapsClient.directions({
