@@ -558,9 +558,9 @@ app.get('/find', function (req, resp) {
 
 app.post('/query', function(request, resp){
   console.log(request);
-  if(request.locations.length === 3){
+  if(request.query.locations.length === 3){
 
-    var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1], 'dst3' : request.locations[2]};
+    var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1], 'dst3' : request.query.locations[2]};
     var level = Object.keys(request_).length;
     var candidates = [];
     for(key in request_){
