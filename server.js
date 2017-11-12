@@ -669,6 +669,9 @@ app.post('/query', function(request, resp){
                       "duration": value
 
                     }
+                    wss.clients.forEach(function each(client) {
+                        client.send(JSON.stringify(result));
+                    });
                     resp.send(result);
                   }
                 });
