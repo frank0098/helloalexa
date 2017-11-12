@@ -10,6 +10,8 @@ var Q = require('q');
 const googlemap = require('@google/maps');
 const WebSocket = require('ws');
 
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 
 var restaurant = ["Hot N Juicy Crawfish, Connecticut Avenue Northwest, Washington, DC", "9th Street Northwest, Washington, DC", "Pearl Dive Oyster Palace, 14th Street Northwest, Washington, DC"];
@@ -38,7 +40,22 @@ var solution = {};
 //   return doneCallback(null);
 // };
 app.get('/test',function(request,response){
-  var ret={"success":true,"message":"I am a real hacker"}
+  var lst=[]
+
+  var random = Math.floor(Math.random() * (restaurant.length-1)) 
+  lst.push(restaurant[random])
+  var random = Math.floor(Math.random() * (supermarket.length-1)) 
+  lst.push(supermarket[random])
+  var random = Math.floor(Math.random() * (movie.length-1)) 
+  lst.push(movie[random])
+
+
+  var ret={"success":true,"type":"locations","home":home,"locations":lst}
+
+  wss.clients.forEach(function each(client) {
+      client.send(JSON.stringify(ret));
+  });
+
   response.send(ret)
 })
 
@@ -333,28 +350,20 @@ app.post('/update_usage',function(request,response){
      }
    }
 
+})
 
-
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
 
 wss.on('connection', function connection(ws, req) {
-  const location = url.parse(req.url, true);
   // You might use location.query.access_token to authenticate or share sessions
   // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
-  ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
-  });
+  // ws.on('message', function incoming(message) {
+  //   console.log('received: %s', message);
+  // });
 
-  ws.send('something');
 });
-
-
-})
-app.listen(7000, function () {
-  console.log('Example app listening on port 7000!')
-})
-
+server.listen(7000, function listening() {
+  console.log('Listening on %d', server.address().port);
+});
 
 // curl -d '{"username":"frank009","usage":3}' -H "Content-Type: application/json" http://10.108.62.232:7000/update_usage
