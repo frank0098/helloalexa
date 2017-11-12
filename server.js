@@ -555,9 +555,13 @@ app.get('/find', function (req, resp) {
 //  // })
 //
 // })
-
+var soldict = {};
+var allPaths = [];
 app.post('/query', function(request, resp){
   console.log(request);
+  if(allPaths.length !== 0 && allPaths.length === Object.keys(soldict).length){
+
+  }
   if(request.query.locations.length === 3){
 
     var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1], 'dst3' : request.query.locations[2]};
@@ -566,7 +570,7 @@ app.post('/query', function(request, resp){
     for(key in request_){
       candidates.push(identify(request_[key]));
     }
-    var allPaths = [];
+
     var visited = [];
     for (var i = 0; i < level; i++) {
       visited.push(false);
@@ -597,7 +601,7 @@ app.post('/query', function(request, resp){
     console.log("ALL PATHS");
     console.log(allPaths.length);
     //console.log(allPaths);
-    soldict = {};
+
     allPaths.forEach(function(path){
       //var candidate = allPaths[k];
       var pos0 = path[0];
@@ -673,7 +677,7 @@ app.post('/query', function(request, resp){
             });
         });
     })
-  }else if(request.locations.length === 2){
+  }else if(request.query.locations.length === 2){
     var request_ = {'dst1': request.locations[0], 'dst2' : request.locations[1]};
     var level = Object.keys(request_).length;
     var candidates = [];
@@ -787,7 +791,7 @@ app.post('/query', function(request, resp){
             });
         });
     })
-  }else if(request.locations.length === 1){
+  }else if(request.query.locations.length === 1){
 
   }
 
