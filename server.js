@@ -561,7 +561,7 @@ app.post('/query', function(request, resp){
   var soldict = {};
   var allPaths = [];
   console.log(request.query.locations);
-  if(request.query.locations.length >= 3){
+  if(typeof request.query.locations=== 'object' && request.query.locations.length >= 3){
 
     var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1], 'dst3' : request.query.locations[2]};
     var level = Object.keys(request_).length;
@@ -681,7 +681,7 @@ app.post('/query', function(request, resp){
             });
         });
     })
-  }else if(request.query.locations.length === 2){
+  }else if(typeof request.query.locations=== 'object' &&request.query.locations.length === 2){
     var request_ = {'dst1': request.query.locations[0], 'dst2' : request.query.locations[1]};
     var level = Object.keys(request_).length;
     var candidates = [];
