@@ -669,9 +669,11 @@ app.post('/query', function(request, resp){
                       "duration": value
 
                     }
+                    console.log("before wss");
                     wss.clients.forEach(function each(client) {
                         client.send(JSON.stringify(result));
                     });
+
                     resp.send(result);
                   }
                 });
@@ -764,6 +766,10 @@ app.post('/query', function(request, resp){
                   "duration": value
 
                 }
+                console.log("before wss2");
+                wss.clients.forEach(function each(client) {
+                    client.send(JSON.stringify(result));
+                });
                 resp.send(result);
               }
             });
