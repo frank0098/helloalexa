@@ -776,9 +776,9 @@ app.post('/query', function(request, resp){
             });
         });
       });
-  }else if(request.query.locations.length === 1){
+  }else{
 
-    var request_ = {'dst1': request.query.locations[0]};
+    var request_ = {'dst1': request.query.locations};
     // var result = {
     //   "success":true,
     //   "type":"locations",
