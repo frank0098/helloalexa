@@ -74,6 +74,17 @@ app.get('/test',function(request,response){
   response.send(ret)
 })
 
+function identify(category){
+  if(category === "restaurant"){
+    return restaurant;
+  }else if(category === "supermarket"){
+    return supermarket;
+  }else if(category === "movie"){
+    return movie;
+  }
+}
+
+
 
 app.get('/find', function (req, resp) {
   //console.log(req);
@@ -102,151 +113,281 @@ app.get('/find', function (req, resp) {
   // })
 //function(err, response);
   //res.send("hellow");
-  for(var i = 0 ; i < restaurant.length ; i++){
-    var restaurantCandidate = restaurant[i];
-    var homeToResDuration;
+  var request_ = {'dst1': "restaurant", 'dst2' : "supermarket", 'dst3' : "movie"};
+  var level = Object.keys(request_).length;
+  var candidates = [];
+  for(key in request_){
+    candidates.push(identify(request_[key]));
+  }
+  console.log(candidates);
+
+
+  var allPaths = [];
+  var visited = [];
+  for (var i = 0; i < level; i++) {
+    visited.push(false);
+  }
+  for(var i = 0 ; i < level; i++){
+    var arr1 = candidates[i];
+    console.log(arr1);
+    for(var j = 0 ; j < arr1.length ; j++){
+      for(var i1 = 0 ; i1 < level ; i1++){
+        if(i1 !== i){
+          var arr2 = candidates[i1];
+          for(var k = 0 ; k < arr2.length ; k++){
+            for(var i2 = 0 ; i2 < level; i2++){
+              if(i !== i2 && i1 !== i2){
+                var arr3 = candidates[i2];
+                for(var m = 0 ; m < arr3.length ; m++){
+                  var solution = [home, arr1[j], arr2[k],arr3[m]];
+                  allPaths.push(solution)
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+  }
+  console.log("ALL PATHS");
+  console.log(allPaths.length);
+  console.log(allPaths);
+  soldict = {};
+  for(var k = 0 ; k < allPaths.length ; k++){
+    var candidate = allPaths[k];
+    var pos0 = candidate[0];
+    var pos1 = candidate[1];
+    var pos2 = candidate[2];
+    var pos3 = candidate[3];
+    console.log("inside loop1");
     var result = googleMapsClient.directions({
-        origin: home,
-        destination: restaurantCandidate,
+        origin: pos0,
+        destination: pos1,
       }, function(err, response){
+        var rank = k;
         var temp = {
-          'dest' : response.query.destination,
+          'dest' : pos2,
           'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
         };
+        console.log("inside loop2");
         var restaurantCandidate1 = response.query.destination;
         //rescur.send("world");
-         for(var j = 0 ; j < supermarket.length; j++){
-           var supermarketCandidate = supermarket[j];
-           console.log("supermarket");
-           console.log(supermarketCandidate);
-           googleMapsClient.directions({
-               origin: restaurantCandidate1,
-               destination: supermarketCandidate,
-             }, function(err, response1){
-
-                   var possibleSolution = [home, response1.query.origin, response1.query.destination];
-                   console.log("solution update");
-                   //console.log(totalTime);
-                   console.log(possibleSolution);
-                   solution[possibleSolution] = temp.duration + parseInt(response1.json.routes[0].legs[0].duration.text);
-                   if(Object.keys(solution).length == supermarket.length * restaurant.length){
-                     console.log("something");
-                     console.log(solution);
-                     var max = 200000;
-                     var candidate;
-                     for(key in solution){
-                       //console.log("=============================")
-                       var value = solution[key];
-                     /* use key/value for intended purpose */
-                       if(max > value){
-                         max = value;
-                         candidate = key;
-                       }
-                     }
-                     console.log(candidate);
-                     console.log("finish");
-                     console.log(solution);
-                     var answer = {'answer':candidate};
-                     resp.send(answer);
-                     console.log(answer)
-                   }else{
-                     console.log("finish one");
-                     console.log(Object.keys(solution).length);
-                     console.log(solution)
-                   }
-             });
-           }
+        googleMapsClient.directions({
+            origin: pos1,
+            destination: pos2,
+          }, function(err, response1){
+            var temp1 = {
+              'dest' : pos2,
+              'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
+            };
+            console.log("inside loop3");
+            googleMapsClient.directions({
+                origin: pos1,
+                destination: pos2,
+              }, function(err, response1){
+                var temp2 = {
+                  'dest' : pos2,
+                  'duration' : parseInt(response1.json.routes[0].legs[0].duration.text)
+                };
+                console.log("inside loop4");
+                var possibleSolution = allPaths[rank];
+                soldict[possibleSolution] = temp.duration + temp1.duration + temp2.duration;
+                console.log(possibleSolution);
+                console.log(Object.keys(soldict).length);
+                if(Object.keys(soldict).length === allPaths.length){
+                  console.log(soldict);
+                }
+              });
+          });
+        //  for(var j = 0 ; j < supermarket.length; j++){
+        //    var supermarketCandidate = supermarket[j];
+        //    console.log("supermarket");
+        //    console.log(supermarketCandidate);
+        //    googleMapsClient.directions({
+        //        origin: pos2,
+        //        destination: pos,
+        //      }, function(err, response1){
+         //
+        //            var possibleSolution = [home, response1.query.origin, response1.query.destination];
+        //            console.log("solution update");
+        //            //console.log(totalTime);
+        //            console.log(possibleSolution);
+        //            solution[possibleSolution] = temp.duration + parseInt(response1.json.routes[0].legs[0].duration.text);
+        //            if(Object.keys(solution).length == supermarket.length * restaurant.length){
+        //              console.log("something");
+        //              console.log(solution);
+        //              var max = 200000;
+        //              var candidate;
+        //              for(key in solution){
+        //                //console.log("=============================")
+        //                var value = solution[key];
+        //              /* use key/value for intended purpose */
+        //                if(max > value){
+        //                  max = value;
+        //                  candidate = key;
+        //                }
+        //              }
+        //              console.log(candidate);
+        //              console.log("finish");
+        //              console.log(solution);
+        //              var answer = {'answer':candidate};
+        //              resp.send(answer);
+        //              console.log(answer)
+        //            }else{
+        //              console.log("finish one");
+        //              console.log(Object.keys(solution).length);
+        //              console.log(solution)
+        //            }
+        //      });
+        //    }
       });
-    }
+  }
   // for(var i = 0 ; i < restaurant.length ; i++){
   //   var restaurantCandidate = restaurant[i];
   //   var homeToResDuration;
   //   var result = googleMapsClient.directions({
   //       origin: home,
   //       destination: restaurantCandidate,
-  //     }).asPromise()
-  //   .then((response) => {
-  //     var temp = {
-  //       'dest' : response.query.destination,
-  //       'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
-  //     };
-  //     balabala(temp, res, function(rescur){
-  //       console.log("something");
-  //       console.log(solution);
-  //       var max = 200000;
-  //       var candidate;
-  //       for(key in solution){
-  //         //console.log("=============================")
-  //         var value = solution[key];
-  //       /* use key/value for intended purpose */
-  //         if(max > value){
-  //           max = value;
-  //           candidate = key;
-  //         }
-  //       }
-  //       console.log(candidate);
-  //       console.log("finish");
-  //       var answer = {'answer':candidate}
-  //       res.send("answer");
-  //       console.log(answer)
+  //     }, function(err, response){
+  //       var temp = {
+  //         'dest' : response.query.destination,
+  //         'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+  //       };
+  //       var restaurantCandidate1 = response.query.destination;
+  //       //rescur.send("world");
+  //        for(var j = 0 ; j < supermarket.length; j++){
+  //          var supermarketCandidate = supermarket[j];
+  //          console.log("supermarket");
+  //          console.log(supermarketCandidate);
+  //          googleMapsClient.directions({
+  //              origin: restaurantCandidate1,
+  //              destination: supermarketCandidate,
+  //            }, function(err, response1){
+  //
+  //                  var possibleSolution = [home, response1.query.origin, response1.query.destination];
+  //                  console.log("solution update");
+  //                  //console.log(totalTime);
+  //                  console.log(possibleSolution);
+  //                  solution[possibleSolution] = temp.duration + parseInt(response1.json.routes[0].legs[0].duration.text);
+  //                  if(Object.keys(solution).length == supermarket.length * restaurant.length){
+  //                    console.log("something");
+  //                    console.log(solution);
+  //                    var max = 200000;
+  //                    var candidate;
+  //                    for(key in solution){
+  //                      //console.log("=============================")
+  //                      var value = solution[key];
+  //                    /* use key/value for intended purpose */
+  //                      if(max > value){
+  //                        max = value;
+  //                        candidate = key;
+  //                      }
+  //                    }
+  //                    console.log(candidate);
+  //                    console.log("finish");
+  //                    console.log(solution);
+  //                    var answer = {'answer':candidate};
+  //                    resp.send(answer);
+  //                    console.log(answer)
+  //                  }else{
+  //                    console.log("finish one");
+  //                    console.log(Object.keys(solution).length);
+  //                    console.log(solution)
+  //                  }
+  //            });
+  //          }
   //     });
-  //   })}
-  //
-  //
-  //   res.send("done");
-  //
-  //
-  //
-  //
-  //
-  //
+  //   }
   // // for(var i = 0 ; i < restaurant.length ; i++){
-  //   var restaurantCandidate = restaurant[i];
-  //   var homeToResDuration;
-  //   var result = googleMapsClient.directions({
-  //       origin: home,
-  //       destination: restaurantCandidate,
-  //     }).asPromise()
-  //   .then((response) => {
-  //
-  //         homeToResDuration = parseInt(response.json.routes[0].legs[0].duration.text);
-  //         console.log(response.json.routes[0].legs[0].duration.text);
-  //         //res.send(response.json);
-  //         console.log(homeToResDuration);
-  //         for(var j = 0 ; j < supermarket.length; j++){
-  //           var supermarketCandidate = supermarket[j];
-  //           console.log("supermarket");
-  //           console.log(supermarketCandidate);
-  //           googleMapsClient.directions({
-  //               origin: restaurantCandidate,
-  //               destination: supermarketCandidate,
-  //             }).asPromise()
-  //           .then((res) => {
-  //                 possibleSolution = [home, restaurantCandidate, supermarketCandidate];
-  //                 console.log("solution update");
-  //                 //console.log(totalTime);
-  //                 console.log(possibleSolution);
-  //                 solution[possibleSolution] = homeToResDuration + parseInt(res.json.routes[0].legs[0].duration.text);
-  //             });
-  //           }
-  //           //response.send(possibleSolution);
-  //     });
-  //
-  for(key in solution){
-    console.log("=============================")
-    var value = solution[key];
-  /* use key/value for intended purpose */
-    console.log(key);
-    console.log(value);
-  }
-  var res = googleMapsClient.geocode({
-  address: 'Zaytinya, 9th Street Northwest, Washington, DC'
-    }).asPromise()
-  .then((response) => {
-    console.log(response.json.results);
-  });
-    console.log(res.finally);
-    // googleMapsClient.placesNearby({
+  // //   var restaurantCandidate = restaurant[i];
+  // //   var homeToResDuration;
+  // //   var result = googleMapsClient.directions({
+  // //       origin: home,
+  // //       destination: restaurantCandidate,
+  // //     }).asPromise()
+  // //   .then((response) => {
+  // //     var temp = {
+  // //       'dest' : response.query.destination,
+  // //       'duration' : parseInt(response.json.routes[0].legs[0].duration.text)
+  // //     };
+  // //     balabala(temp, res, function(rescur){
+  // //       console.log("something");
+  // //       console.log(solution);
+  // //       var max = 200000;
+  // //       var candidate;
+  // //       for(key in solution){
+  // //         //console.log("=============================")
+  // //         var value = solution[key];
+  // //       /* use key/value for intended purpose */
+  // //         if(max > value){
+  // //           max = value;
+  // //           candidate = key;
+  // //         }
+  // //       }
+  // //       console.log(candidate);
+  // //       console.log("finish");
+  // //       var answer = {'answer':candidate}
+  // //       res.send("answer");
+  // //       console.log(answer)
+  // //     });
+  // //   })}
+  // //
+  // //
+  // //   res.send("done");
+  // //
+  // //
+  // //
+  // //
+  // //
+  // //
+  // // // for(var i = 0 ; i < restaurant.length ; i++){
+  // //   var restaurantCandidate = restaurant[i];
+  // //   var homeToResDuration;
+  // //   var result = googleMapsClient.directions({
+  // //       origin: home,
+  // //       destination: restaurantCandidate,
+  // //     }).asPromise()
+  // //   .then((response) => {
+  // //
+  // //         homeToResDuration = parseInt(response.json.routes[0].legs[0].duration.text);
+  // //         console.log(response.json.routes[0].legs[0].duration.text);
+  // //         //res.send(response.json);
+  // //         console.log(homeToResDuration);
+  // //         for(var j = 0 ; j < supermarket.length; j++){
+  // //           var supermarketCandidate = supermarket[j];
+  // //           console.log("supermarket");
+  // //           console.log(supermarketCandidate);
+  // //           googleMapsClient.directions({
+  // //               origin: restaurantCandidate,
+  // //               destination: supermarketCandidate,
+  // //             }).asPromise()
+  // //           .then((res) => {
+  // //                 possibleSolution = [home, restaurantCandidate, supermarketCandidate];
+  // //                 console.log("solution update");
+  // //                 //console.log(totalTime);
+  // //                 console.log(possibleSolution);
+  // //                 solution[possibleSolution] = homeToResDuration + parseInt(res.json.routes[0].legs[0].duration.text);
+  // //             });
+  // //           }
+  // //           //response.send(possibleSolution);
+  // //     });
+  // //
+  // for(key in solution){
+  //   console.log("=============================")
+  //   var value = solution[key];
+  // /* use key/value for intended purpose */
+  //   console.log(key);
+  //   console.log(value);
+  // }
+  // var res = googleMapsClient.geocode({
+  // address: 'Zaytinya, 9th Street Northwest, Washington, DC'
+  //   }).asPromise()
+  // .then((response) => {
+  //   console.log(response.json.results);
+  // });
+  //   console.log(res.finally);
+  //   // googleMapsClient.placesNearby({
     //   language: 'en',
     //   location: [38.899928, -77.047187],
     //   radius: 500,
@@ -327,63 +468,6 @@ app.post('/update_usage',function(request,response){
 
      }
    }
-
-  //  client.query("SELECT * FROM printingtable WHERE username = $1", [username],function(err,res){
-  //   if(err){
-   //
-  //    ret.message=err;
-  //    response.send(ret);
-  //    return;
-  //   }
-  //   else{
-  //    if(res.rows.length==0){
-  //     console.log("length 0")
-  //     client.query("insert into printingtable (username,usage) values ($1,$2) returning username",[username,usage],
-  //      function(err){
-  //       if(err){
-  //        ret.message=err;
-  //        response.send(ret);
-  //        return;
-  //       }
-  //       else{
-   //
-  //        // done();
-  //        ret.success=true;
-  //        ret.message="new user created";
-  //        response.send(ret);
-  //        return;
-  //       }
-   //
-  //      })
-  //    }
-  //    else{
-  //     var updated_usage=parseInt(usage)+parseInt(res.rows[0].usage);
-  //     console.log("usage "+updated_usage)
-  //     client.query("update printingtable set usage = $1 where username = $2",[updated_usage,username],function(err,result){
-  //      console.log("here")
-  //      if(err){
-  //       ret.message=err;
-  //       response.send(ret);
-  //       return;
-  //      }
-  //      else{
-   //
-  //       // done();
-  //       ret.success=true;
-  //       ret.message="updated usage"
-  //       response.send(ret);
-  //       return;
-  //      }
-   //
-  //     })
-   //
-  //    }
-   //
-  //   }
-   //
-   //
-   //
-  //  });
 
 })
 app.listen(7000, function () {
