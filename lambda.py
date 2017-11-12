@@ -46,11 +46,11 @@ def get_welcome_response():
     session_attributes = {}
     card_title = "Welcome"
     speech_output = "Welcome to the Weekend killer. " \
-                    "Please tell me your destination, "
+                    "Please tell me where you want to go, "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
 
-    reprompt_text = "Please tell me your destination by saying, " \
+    reprompt_text = "Please tell me where you want to go by saying, " \
                     "my destination is ."
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
@@ -107,7 +107,7 @@ def set_destination(intent,session):
                 speech_output="This is the path I suggest: First go to "
                 for x in locations:
                     key="Destination"+str(x)
-                    tmp= x+", then go to "
+                    tmp= x+", then "
                     speech_output+=tmp
                 speech_output+=", then go home"
                 
