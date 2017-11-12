@@ -4,9 +4,13 @@ app.use(express.static(__dirname + '/public'));
 var bodyParser = require('body-parser');
 var cors = require('cors')
 var sync = require('synchronize')
+const http = require('http');
 app.use(cors())
 var Q = require('q');
 const googlemap = require('@google/maps');
+const WebSocket = require('ws');
+
+
 
 var restaurant = ["Hot N Juicy Crawfish, Connecticut Avenue Northwest, Washington, DC", "9th Street Northwest, Washington, DC", "Pearl Dive Oyster Palace, 14th Street Northwest, Washington, DC"];
 var supermarket = ["Whole Foods Market, P Street Northwest, Washington, DC", "FRESHFARM Dupont Circle Market, 20th Street Northwest, Washington, DC"];
@@ -18,6 +22,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+
 
 var googleMapsClient = googlemap.createClient({
   key: 'AIzaSyAG1sewpsgHrqBdghrvHBxkaGCse0QBLd4',
@@ -328,62 +333,23 @@ app.post('/update_usage',function(request,response){
      }
    }
 
-  //  client.query("SELECT * FROM printingtable WHERE username = $1", [username],function(err,res){
-  //   if(err){
-   //
-  //    ret.message=err;
-  //    response.send(ret);
-  //    return;
-  //   }
-  //   else{
-  //    if(res.rows.length==0){
-  //     console.log("length 0")
-  //     client.query("insert into printingtable (username,usage) values ($1,$2) returning username",[username,usage],
-  //      function(err){
-  //       if(err){
-  //        ret.message=err;
-  //        response.send(ret);
-  //        return;
-  //       }
-  //       else{
-   //
-  //        // done();
-  //        ret.success=true;
-  //        ret.message="new user created";
-  //        response.send(ret);
-  //        return;
-  //       }
-   //
-  //      })
-  //    }
-  //    else{
-  //     var updated_usage=parseInt(usage)+parseInt(res.rows[0].usage);
-  //     console.log("usage "+updated_usage)
-  //     client.query("update printingtable set usage = $1 where username = $2",[updated_usage,username],function(err,result){
-  //      console.log("here")
-  //      if(err){
-  //       ret.message=err;
-  //       response.send(ret);
-  //       return;
-  //      }
-  //      else{
-   //
-  //       // done();
-  //       ret.success=true;
-  //       ret.message="updated usage"
-  //       response.send(ret);
-  //       return;
-  //      }
-   //
-  //     })
-   //
-  //    }
-   //
-  //   }
-   //
-   //
-   //
-  //  });
+
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', function connection(ws, req) {
+  const location = url.parse(req.url, true);
+  // You might use location.query.access_token to authenticate or share sessions
+  // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
+
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+  });
+
+  ws.send('something');
+});
+
 
 })
 app.listen(7000, function () {
